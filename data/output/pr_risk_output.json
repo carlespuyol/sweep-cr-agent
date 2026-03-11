@@ -1,0 +1,28 @@
+{
+  "risk_level": "high",
+  "risk_reasoning": "The PR modifies critical paths such as `full_dispatch_request`, introduces the tenant resolution layer, and has unresolved correctness concerns such as the unreachable `finally` block in `full_dispatch_request`, potential race conditions in `_apply_tenant_config_overrides`, and issues with thread-local storage compatibility with async views or greenlets. The security analysis identified high-severity issues related to information disclosure and insecure defaults.",
+  "architectural_impact": "This PR significantly affects Flask's architecture by introducing a new tenant resolution layer, modifying the request lifecycle, and changing session management and URL generation. It adds new abstractions and shared state, notably the `TenantRegistry` and thread-local storage for the current tenant, which have far-reaching implications across the request lifecycle and potentially impact concurrent requests.",
+  "review_focus_areas": [
+    "src/flask/app.py, full_dispatch_request: Verify that tenant resolution is correctly integrated and that error handling and cleanup are properly implemented.",
+    "src/flask/tenant.py, resolve_tenant_from_request: Examine the logic for resolving the tenant ID from the request environment, particularly the handling of `HTTP_HOST`.",
+    "src/flask/sessions.py, get_signing_serializer: Verify that the logic for selecting the secret key based on the current tenant is correct and handles edge cases properly.",
+    "src/flask/helpers.py, url_for: Check how the function behaves when `get_current_tenant()` returns `None` and ensure this aligns with the expected behavior.",
+    "tests/test_multitenant.py, test_tenant_session_isolation: Verify that the TODO comment is addressed and a test is added to check for cross-tenant replay rejection."
+  ],
+  "complexity_score": 8.5,
+  "confidence": 0.55,
+  "reasoning_trace": [
+    "Step 1: Parsed PR 'Overhaul request dispatch and session management for multi-tenant support' — 7 file(s) changed, +286/-16 lines.",
+    "Step 2: Triage classified PR as 'complex': This PR is complex because it touches core framework internals such as `app.py` and `ctx.py`, modifies the request lifecycle by introducing a tenant resolution layer in `full_dispatch_request`, and changes multiple interconnected modules including `sessions.py` and `helpers.py`, with a total of 7 files changed.",
+    "Step 3 (file): Analyzed src/flask/tenant.py — complexity 8.0/10, 3 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/app.py — complexity 8.0/10, 3 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/sessions.py — complexity 7.0/10, 3 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/helpers.py — complexity 6.0/10, 3 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/ctx.py — complexity 6.0/10, 2 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/sansio/app.py — complexity 4.0/10, 2 risk indicator(s).",
+    "Step 3 (file): Analyzed tests/test_multitenant.py — complexity 5.0/10, 3 risk indicator(s).",
+    "Step 4: Architectural analysis complete — 3 cross-cutting concern(s) identified.",
+    "Step 5: Security analysis complete — 6 issue(s) found, overall severity: high.",
+    "Step 6: Synthesis complete — risk=high, complexity=8.5, confidence=0.55."
+  ]
+}

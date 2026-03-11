@@ -1,0 +1,26 @@
+{
+  "pr_title": "Fix jsonify content-type when JSONIFY_MIMETYPE is overridden",
+  "pr_description": "When a user overrides `JSONIFY_MIMETYPE` in Flask config (e.g. to `application/vnd.api+json`), the `jsonify()` helper was ignoring that setting and always returning `application/json`. This fix reads the config value at response time instead of at module load time, so the correct MIME type is used.",
+  "author": "contributor_42",
+  "changed_files": [
+    {
+      "path": "src/flask/json/provider.py",
+      "status": "modified",
+      "lines_added": 14,
+      "lines_removed": 5,
+      "diff": "@@ -1,6 +1,7 @@\n from __future__ import annotations\n \n import json\n+import typing as t\n from datetime import date\n from datetime import datetime\n from decimal import Decimal\n@@ -8,6 +9,9 @@ from uuid import UUID\n \n from werkzeug.http import http_date\n \n+if t.TYPE_CHECKING:\n+    from ..app import Flask\n+\n \n class DefaultJSONProvider(JSONProvider):\n     \"\"\"Provide JSON operations using Python's built-in :mod:`json`\n@@ -72,11 +76,16 @@ class DefaultJSONProvider(JSONProvider):\n         kwargs.setdefault(\"cls\", self._encoder)\n         return json.dumps(obj, **kwargs)\n \n-    def response(self, *args: t.Any, **kwargs: t.Any) -> Response:\n-        obj = self._app.json.dumps(*args, **kwargs)\n-        return self._app.response_class(\n-            obj, mimetype=self._app.config.get(\"JSONIFY_MIMETYPE\", \"application/json\")\n-        )\n+    def response(self, *args: t.Any, **kwargs: t.Any) -> Response:\n+        obj = self._app.json.dumps(*args, **kwargs)\n+        mimetype = self._app.config.get(\"JSONIFY_MIMETYPE\")\n+\n+        if not mimetype or not isinstance(mimetype, str):\n+            mimetype = \"application/json\"\n+\n+        return self._app.response_class(obj, mimetype=mimetype)\n"
+    },
+    {
+      "path": "tests/test_json.py",
+      "status": "modified",
+      "lines_added": 12,
+      "lines_removed": 0,
+      "diff": "@@ -147,3 +147,15 @@ def test_jsonify_basic_types():\n     rv = client.get(\"/\")\n     assert rv.status_code == 200\n     assert rv.json == {\"key\": \"value\"}\n+\n+\n+def test_jsonify_custom_mimetype():\n+    app = flask.Flask(__name__)\n+    app.config[\"JSONIFY_MIMETYPE\"] = \"application/vnd.api+json\"\n+\n+    @app.route(\"/\")\n+    def index():\n+        return flask.jsonify({\"data\": \"ok\"})\n+\n+    client = app.test_client()\n+    rv = client.get(\"/\")\n+    assert rv.content_type == \"application/vnd.api+json\"\n"
+    }
+  ],
+  "base_commit": "a1b2c3d4",
+  "head_commit": "f5e6d7c8",
+  "files_changed": 2,
+  "total_additions": 26,
+  "total_deletions": 5
+}

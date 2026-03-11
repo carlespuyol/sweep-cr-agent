@@ -1,0 +1,28 @@
+{
+  "risk_level": "medium",
+  "risk_reasoning": "The PR touches moderately important paths in Flask's request lifecycle and introduces new abstractions that could potentially alter existing behavior. The addition of blueprint-specific middleware and signals adds complexity and may have a limited blast radius, but it is still a significant change.",
+  "architectural_impact": "This PR introduces a new middleware layer for Flask blueprints, allowing them to register their own lifecycle hooks independently of global application hooks. It adds new abstractions (`MiddlewareStack`, `blueprint_middleware` decorator) and modifies existing components (Blueprint, App) to integrate with this new layer, affecting the request lifecycle and potentially altering the behavior of existing applications.",
+  "review_focus_areas": [
+    "src/flask/middleware.py:MiddlewareStack - Verify that the sorting logic and execution order of middleware entries are correct.",
+    "src/flask/app.py:_get_blueprint_middleware_for_request - Check the logic for matching blueprint URL prefixes and the performance implications of iterating over all blueprints.",
+    "src/flask/ctx.py:RequestContext - Verify that the conditional logging based on `app.debug` is correct and that the log accumulation doesn't introduce unintended side effects or performance issues in debug mode.",
+    "src/flask/signals.py - Ensure that the new signal names are unique and appropriately documented, and that the sender and keyword arguments for the new signals are correctly used and documented.",
+    "tests/test_blueprint_middleware.py:test_teardown_middleware_called_on_exception - Verify that the test correctly checks blueprint-specific teardown middleware execution on exceptions."
+  ],
+  "complexity_score": 8.0,
+  "confidence": 0.75,
+  "reasoning_trace": [
+    "Step 1: Parsed PR 'Add per-blueprint middleware and lifecycle hook support' — 7 file(s) changed, +387/-14 lines.",
+    "Step 2: Triage classified PR as 'complex': This PR is complex because it touches core framework internals such as `app.py` and `ctx.py`, modifies the request/response lifecycle by introducing a new middleware layer and signals per blueprint, and changes multiple interconnected modules including `blueprints.py`, `middleware.py`, and `signals.py`, with a total of 7 files changed.",
+    "Step 3 (file): Analyzed src/flask/middleware.py — complexity 7.0/10, 3 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/blueprints.py — complexity 7.0/10, 3 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/app.py — complexity 8.0/10, 3 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/ctx.py — complexity 5.0/10, 2 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/signals.py — complexity 4.0/10, 2 risk indicator(s).",
+    "Step 3 (file): Analyzed src/flask/sansio/app.py — complexity 5.0/10, 3 risk indicator(s).",
+    "Step 3 (file): Analyzed tests/test_blueprint_middleware.py — complexity 5.0/10, 2 risk indicator(s).",
+    "Step 4: Architectural analysis complete — 2 cross-cutting concern(s) identified.",
+    "Step 5: Security analysis complete — 2 issue(s) found, overall severity: medium.",
+    "Step 6: Synthesis complete — risk=medium, complexity=8.0, confidence=0.75."
+  ]
+}
