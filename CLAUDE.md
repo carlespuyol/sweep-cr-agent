@@ -35,16 +35,9 @@ parse_pr -> triage --(complex)--> [analyze_file via Send()] -> arch_analysis -> 
 
 ## Commands
 
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the PR analysis
-python analyze_pr.py --pr data/input/pr_input.json --output data/output/code_review_output.json
-
-# Run tests
-python -m pytest tests/ -v
-```
+- **Install deps**: `/install`
+- **Run analysis**: `/run-analysis`
+- **Run tests**: use the `test-runner` agent
 
 ## Code Style & Quality Standards
 
