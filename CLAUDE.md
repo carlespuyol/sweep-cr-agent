@@ -63,15 +63,6 @@ python -m pytest tests/ -v
 - CLI exits with non-zero code on failure, descriptive stderr messages
 - Each node validates its required state fields before processing
 
-## What NOT to Build
-
-- No UI or web interface
-- No real GitHub API integration
-- No database or persistence layer
-- No authentication system
-- No deployment configuration
-- No extensive test suite (one integration test is fine)
-
 ## Environment
 
 - API key via `.env` file (python-dotenv) or `TOGETHER_API_KEY` env var
