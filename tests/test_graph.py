@@ -21,6 +21,15 @@ def pr_data():
         return json.load(f)
 
 
+@pytest.fixture(autouse=True, scope="session")
+def disable_langfuse():
+    """Remove Langfuse credentials for the entire test session.
+    """
+    LANGFUSE_KEYS = ("LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY", "LANGFUSE_HOST")
+    for key in LANGFUSE_KEYS:
+        os.environ.pop(key, None)
+
+
 @pytest.mark.skipif(
     not os.environ.get("TOGETHER_API_KEY"),
     reason="TOGETHER_API_KEY not set",
